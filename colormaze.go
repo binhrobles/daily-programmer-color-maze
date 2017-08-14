@@ -51,9 +51,11 @@ func NewMaze(s string) *Maze {
 	return &m
 }
 
+// func
+
 // find entry point (where sequence[0] == rows[len][x])
 // the bottom row (highest index) is the beginning
-func getEntryPoint(m *Maze) Crumb {
+func (m *Maze) getEntryPoint() Crumb {
 	entryRow := len(m.rows) - 1
 	var crumb Crumb
 
@@ -70,18 +72,22 @@ func getEntryPoint(m *Maze) Crumb {
 	return crumb
 }
 
-func getLastCrumb(m *Maze) Crumb {
+func (m *Maze) getLastCrumb() Crumb {
 	return m.path[len(m.path)-1]
 }
 
-func goForward(m *Maze) Crumb {
+func (m *Maze) goForward() Crumb {
 	var c Crumb
-	last := getLastCrumb(m)
+	last := m.getLastCrumb()
+
+	// fmt.Println(last)
 
 	return c
 }
 
-func dropCrumb(m *Maze, c Crumb) {
+// adds the crumb to the path
+// increments the index of the sequence so we know we good
+func (m *Maze) dropCrumb(c Crumb) {
 	m.path = append(m.path, c)
 	m.seqIdx++
 	m.seqIdx %= len(m.sequence)
@@ -92,12 +98,12 @@ func main() {
 	maze := NewMaze("maze.txt")
 
 	// find entry point (where sequence[0] == rows[len][x])
-	entry := getEntryPoint(maze)
-	dropCrumb(maze, entry)
+	entry := maze.getEntryPoint()
+	maze.dropCrumb(entry)
 
 	// TODO: find next step (where sequence[n+1] == rows[len-1][x])
 	// probably want to prefer forward progress
-	goForward(maze)
+	maze.goForward()
 }
 
 // sequence: O G
