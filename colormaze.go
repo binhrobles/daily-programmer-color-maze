@@ -10,8 +10,13 @@ func check(e error) {
 	}
 }
 
+type Maze struct {
+	sequence string
+	rows     []string
+}
+
 // making the assumption that the maze is a square
-func getMazeSpecs(s string) (string, []string) {
+func NewMaze(s string) *Maze {
 	f, err := ioutil.ReadFile(s)
 	check(err)
 
@@ -29,12 +34,15 @@ func getMazeSpecs(s string) (string, []string) {
 		rows[i] = replacer.Replace(raw[i+1])
 	}
 
-	return sequence, rows
+	var m Maze
+	m.sequence = sequence
+	m.rows = rows
+	return &m
 }
 
 func main() {
-	sequence, rows := getMazeSpecs("maze.txt")
-	fmt.Printf("sequence: %s\nmaze: \n%v", sequence, rows)
+	maze := NewMaze("maze.txt")
+	fmt.Printf("sequence: %s\nmaze: \n%v", maze.sequence, maze.rows)
 
 	// TODO: find entry point (where sequence[0] == rows[len][x])
 
