@@ -145,6 +145,8 @@ func (m *Maze) getLastPoint() (Point, Point) {
 // probably want to prefer forward progress
 func (m *Maze) getNextMove() Point {
 	var c Point
+	c.row = -1
+
 	last, direction := m.getLastPoint()
 
 	options := last.getAdjacent(direction, m.width, m.depth)
@@ -152,6 +154,8 @@ func (m *Maze) getNextMove() Point {
 	for _, o := range options {
 		if o.isNext(m) {
 			c = o
+			// TODO: queue this option up, somehow
+			// need to create a queue of choices that we can refer back to
 			break
 		}
 	}
@@ -182,7 +186,13 @@ func main() {
 	iterations := 0
 	for current.row != 0 && iterations < maze.width*maze.depth {
 		current = maze.getNextMove()
-		maze.dropPoint(current)
+
+		// we weren't able to go down this path
+		if current.row == -1 {
+			// go back to last point that had another valid option
+		} else {
+			maze.dropPoint(current)
+		}
 		iterations++
 	}
 
