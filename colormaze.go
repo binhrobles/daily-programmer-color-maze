@@ -1,6 +1,7 @@
 package main
 
 import "fmt"
+import "flag"
 import "io/ioutil"
 import "strings"
 
@@ -168,7 +169,10 @@ func (m *Maze) dropPoint(c Point) {
 }
 
 func main() {
-	maze := NewMaze("maze.txt")
+	filename := flag.String("maze", "maze.txt", "the file containing the maze sequence and definition")
+
+	flag.Parse()
+	maze := NewMaze(*filename)
 
 	// find entry point (where sequence[0] == rows[len][row])
 	current := maze.getEntryPoint()
