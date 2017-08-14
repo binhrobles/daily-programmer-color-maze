@@ -11,8 +11,44 @@ func check(e error) {
 }
 
 type Crumb struct {
-	x int
-	y int
+	row int
+	col int
+}
+
+func (c Crumb) isNext(m *Maze) bool {
+	return m.sequence[m.seqIdx] == byte(m.rows[c.row][c.col])
+}
+
+// ensures the crumb won't be thrown over an edge
+func (c Crumb) exists(width int, depth int) bool {
+	return c.row >= 0 && c.row < depth && c.col >= 0 && c.col < width
+}
+
+// return adjacent points north, west, east, then south
+func (c Crumb) getAdjacent(width int, depth int) []Crumb {
+	possible := make([]Crumb, 4)
+
+	// north
+	possible[0].row = c.row - 1
+	possible[0].col = c.col
+	// west
+	possible[1].row = c.row
+	possible[1].col = c.col - 1
+	// east
+	possible[2].row = c.row
+	possible[2].col = c.col + 1
+	// south :(
+	possible[3].row = c.row + 1
+	possible[3].col = c.col
+
+	var actual []Crumb
+	for _, p := range possible {
+		if p.exists(width, depth) {
+			actual = append(actual, p)
+		}
+	}
+
+	return actual
 }
 
 type Maze struct {
@@ -20,6 +56,8 @@ type Maze struct {
 	seqIdx   int
 	rows     []string
 	path     []Crumb // don't initialize this slice, just append to it
+	width    int
+	depth    int
 }
 
 // making the assumption that the maze is a square
@@ -32,9 +70,10 @@ func NewMaze(s string) *Maze {
 
 	sequence := replacer.Replace(raw[0])
 	width := len(replacer.Replace(raw[1]))
+	depth := len(raw) - 2
 
 	fmt.Println("Maze Specs\n----------")
-	fmt.Printf("width: %d depth: %d\n", width, len(raw)-2)
+	fmt.Printf("width: %d depth: %d\n", width, depth)
 	fmt.Printf("sequence: %s\n", sequence)
 
 	rows := make([]string, len(raw)-2)
@@ -48,12 +87,12 @@ func NewMaze(s string) *Maze {
 	m.sequence = sequence
 	m.seqIdx = 0
 	m.rows = rows
+	m.width = width
+	m.depth = depth
 	return &m
 }
 
-// func
-
-// find entry point (where sequence[0] == rows[len][x])
+// find entry point (where sequence[0] == rows[len][row])
 // the bottom row (highest index) is the beginning
 func (m *Maze) getEntryPoint() Crumb {
 	entryRow := len(m.rows) - 1
@@ -62,9 +101,9 @@ func (m *Maze) getEntryPoint() Crumb {
 	// iterate through every char in the entry row
 	// until we find the char we want
 	for i, c := range m.rows[entryRow] {
-		if m.sequence[0] == byte(c) {
-			crumb.x = entryRow
-			crumb.y = i
+		if m.sequence[m.seqIdx] == byte(c) {
+			crumb.row = entryRow
+			crumb.col = i
 			break
 		}
 	}
@@ -80,7 +119,15 @@ func (m *Maze) goForward() Crumb {
 	var c Crumb
 	last := m.getLastCrumb()
 
-	// fmt.Println(last)
+	options := last.getAdjacent(m.width, m.depth)
+
+	for _, o := range options {
+		if o.isNext(m) {
+			c = o
+		}
+	}
+
+	fmt.Printf("c: %v\n", c)
 
 	return c
 }
@@ -97,11 +144,11 @@ func (m *Maze) dropCrumb(c Crumb) {
 func main() {
 	maze := NewMaze("maze.txt")
 
-	// find entry point (where sequence[0] == rows[len][x])
+	// find entry point (where sequence[0] == rows[len][row])
 	entry := maze.getEntryPoint()
 	maze.dropCrumb(entry)
 
-	// TODO: find next step (where sequence[n+1] == rows[len-1][x])
+	// TODO: find next step (where sequence[n+1] == rows[len-1][row])
 	// probably want to prefer forward progress
 	maze.goForward()
 }
