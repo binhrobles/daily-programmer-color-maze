@@ -17,6 +17,7 @@ type Crumb struct {
 
 type Maze struct {
 	sequence string
+	seqIdx   int
 	rows     []string
 	path     []Crumb // don't initialize this slice, just append to it
 }
@@ -45,6 +46,7 @@ func NewMaze(s string) *Maze {
 
 	var m Maze
 	m.sequence = sequence
+	m.seqIdx = 0
 	m.rows = rows
 	return &m
 }
@@ -68,17 +70,34 @@ func getEntryPoint(m *Maze) Crumb {
 	return crumb
 }
 
+func getLastCrumb(m *Maze) Crumb {
+	return m.path[len(m.path)-1]
+}
+
+func goForward(m *Maze) Crumb {
+	var c Crumb
+	last := getLastCrumb(m)
+
+	return c
+}
+
+func dropCrumb(m *Maze, c Crumb) {
+	m.path = append(m.path, c)
+	m.seqIdx++
+	m.seqIdx %= len(m.sequence)
+	fmt.Printf("Path forward: %v\n", m.path)
+}
+
 func main() {
 	maze := NewMaze("maze.txt")
 
 	// find entry point (where sequence[0] == rows[len][x])
 	entry := getEntryPoint(maze)
-
-	maze.path = append(maze.path, entry)
-	fmt.Printf("Path forward: %v\n", maze.path)
+	dropCrumb(maze, entry)
 
 	// TODO: find next step (where sequence[n+1] == rows[len-1][x])
 	// probably want to prefer forward progress
+	goForward(maze)
 }
 
 // sequence: O G
