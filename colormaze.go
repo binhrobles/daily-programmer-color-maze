@@ -129,10 +129,11 @@ func (m *Maze) getLastPoint() (Point, Point) {
 
 	var direction Point
 	if len(m.path) > 1 {
-		direction.row = m.path[len(m.path)-2].row - last.row
-		direction.row = m.path[len(m.path)-2].col - last.col
+		direction.row = last.row - m.path[len(m.path)-2].row
+		direction.col = last.col - m.path[len(m.path)-2].col
 	} else {
-		direction.row = 0
+		// point em north
+		direction.row = -1
 		direction.col = 0
 	}
 
@@ -175,18 +176,11 @@ func main() {
 
 	// keep moving forward(ish) until we're at the top row
 	iterations := 0
-	for current.row != 0 && iterations < 20 {
-		current := maze.getNextMove()
+	for current.row != 0 && iterations < maze.width*maze.depth {
+		current = maze.getNextMove()
 		maze.dropPoint(current)
 		iterations++
 	}
 
 	fmt.Println("We're out of the woods!")
 }
-
-// sequence: O G
-// 1: B O R O Y
-// 2: O R B G R
-// 3: B O G O Y
-// 4: Y G B Y G
-// 5: R O R B R
